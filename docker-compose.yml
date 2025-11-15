@@ -1,6 +1,9 @@
 services:
   service-notifications:
     build: ./notifications-service
+    container_name: service-notifications
+    ports:
+      - "3003:3000"
     restart: always
     environment:
       DB_HOST: notifications-db
@@ -9,15 +12,19 @@ services:
       DB_NAME: notificationsdb
       DB_PORT: 5432
       USERS_API: http://service-users:3000
-      REDIS_HOST: redis
+      REDIS_HOST: redis-notifications
       REDIS_PORT: 6379
+    env_file:
+      - notifications-service/.env
     depends_on:
-      - notifications-db
-      - redis-notifications
-    networks: [AgendaFacil_Notifications]
+      notifications-db:
+        condition: service_healthy
+    networks:
+      - agendafacil_network
 
   notifications-db:
     image: postgres:15
+    container_name: notifications-db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -25,32 +32,41 @@ services:
       POSTGRES_DB: notificationsdb
     ports:
       - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d schedulingdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - notifications_data:/var/lib/postgresql/data
     networks:
-      - AgendaFacil_Notifications
+      - agendafacil_network
     
   redis-notifications:
     image: redis:7
+    container_name: redis-notifications
     restart: always
     ports:
-      - "6379:6379"
-    networks: [AgendaFacil_Notifications]
+      - "6381:6379"
+    networks:
+      - agendafacil_network
   
   nginx-notifications:
     image: nginx:alpine
+    container_name: nginx-notifications
     restart: always
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "8080:8080"
+      - "8082:8082"
     depends_on:
       - service-notifications
-    networks: [AgendaFacil_Notifications]
+    networks:
+      - agendafacil_network
 
 volumes:
   notifications_data:
 
 networks:
-  AgendaFacil_Notifications:
-    driver: bridge
+  agendafacil_network:
+    external: true
