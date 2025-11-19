@@ -157,7 +157,7 @@ export class NotificationsCompanyService {
             const customer = customerMap.get(notification.customerId);
 
             return {
-                idNoticationCompany: notification.idNotificationCompany,
+                idNotificationCompany: notification.idNotificationCompany,
                 type: notification.type,
                 text: notification.text,
                 date: notification.date,
