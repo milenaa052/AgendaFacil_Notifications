@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { NotificationsCompanyModule } from './notifications-company/notificationsCompany.module';
+import { NotificationsCustomerModule } from './notifications-customer/notificationsCustomer.module';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -28,7 +29,8 @@ import { JwtModule } from '@nestjs/jwt';
       signOptions: { expiresIn: '7d' }
     }),
 
-    NotificationsCompanyModule
+    NotificationsCompanyModule,
+    NotificationsCustomerModule
   ],
   providers: [JwtStrategy]
 })
