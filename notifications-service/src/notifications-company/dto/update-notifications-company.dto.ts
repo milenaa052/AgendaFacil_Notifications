@@ -8,5 +8,8 @@ export class UpdateNotificationCompanyDto {
     @IsOptional() @IsString() text?: string;
     @IsOptional() @IsString() street?: string;
     @IsOptional() @IsNumber() number?: number;
-    @IsOptional() @IsDateString() startDate?: Date;
+    @IsOptional() @IsString() schedulingDate: string;
+    @IsOptional() @IsString() schedulingStartTime: string;
+    @IsOptional() @IsString() schedulingEndTime: string;
+    @IsOptional() @IsDateString() date?: Date;
 }

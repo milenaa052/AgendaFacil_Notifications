@@ -7,5 +7,8 @@ export class UpdateNotificationCustomerDto {
     @IsOptional() @IsEnum(NotificationCustomerType) type?: NotificationCustomerType;
     @IsOptional() @IsString() text?: string;
     @IsOptional() @IsString() profession?: string;
-    @IsOptional() @IsDateString() startDate?: Date;
+    @IsOptional() @IsString() schedulingDate: string;
+    @IsOptional() @IsString() schedulingStartTime: string;
+    @IsOptional() @IsString() schedulingEndTime: string;
+    @IsOptional() @IsDateString() date?: Date;
 }

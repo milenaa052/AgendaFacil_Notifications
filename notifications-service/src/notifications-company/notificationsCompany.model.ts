@@ -17,6 +17,9 @@ export interface NotificationCompanyCreationAttributes {
     text: string;
     street: string;
     number: number;
+    schedulingDate: string;
+    schedulingStartTime: string;
+    schedulingEndTime: string;
     date: Date
 }
 
@@ -67,6 +70,24 @@ export class NotificationsCompany extends Model<NotificationsCompany, Notificati
         allowNull: false 
     })
     declare number: number;
+
+    @Column({ 
+        type: DataType.STRING,
+        allowNull: true 
+    })
+    declare schedulingDate: string;
+
+    @Column({ 
+        type: DataType.STRING,
+        allowNull: true 
+    })
+    declare schedulingStartTime: string;
+
+    @Column({ 
+        type: DataType.STRING,
+        allowNull: true 
+    })
+    declare schedulingEndTime: string;
 
     @Column({ 
         type: DataType.DATE,

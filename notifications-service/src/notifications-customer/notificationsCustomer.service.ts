@@ -87,6 +87,9 @@ export class NotificationsCustomerService {
             type: createNotificationCustomerDto.type,
             text: createNotificationCustomerDto.text,
             profession: createNotificationCustomerDto.profession,
+            schedulingDate: createNotificationCustomerDto.schedulingDate,
+            schedulingStartTime: createNotificationCustomerDto.schedulingStartTime,
+            schedulingEndTime: createNotificationCustomerDto.schedulingEndTime,
             date: createNotificationCustomerDto.date
         };
 
@@ -159,6 +162,9 @@ export class NotificationsCustomerService {
                 idNotificationCustomer: notification.idNotificationCustomer,
                 type: notification.type,
                 text: notification.text,
+                schedulingDate: notification.schedulingDate,
+                schedulingStartTime: notification.schedulingStartTime,
+                schedulingEndTime: notification.schedulingEndTime,
                 date: notification.date,
 
                 customer: {
