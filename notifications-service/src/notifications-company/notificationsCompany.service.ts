@@ -88,6 +88,9 @@ export class NotificationsCompanyService {
             text: createNotificationCompanyDto.text,
             street: createNotificationCompanyDto.street,
             number: createNotificationCompanyDto.number,
+            schedulingDate: createNotificationCompanyDto.schedulingDate,
+            schedulingStartTime: createNotificationCompanyDto.schedulingStartTime,
+            schedulingEndTime: createNotificationCompanyDto.schedulingEndTime,
             date: createNotificationCompanyDto.date
         };
 
@@ -160,6 +163,9 @@ export class NotificationsCompanyService {
                 idNotificationCompany: notification.idNotificationCompany,
                 type: notification.type,
                 text: notification.text,
+                schedulingDate: notification.schedulingDate,
+                schedulingStartTime: notification.schedulingStartTime,
+                schedulingEndTime: notification.schedulingEndTime,
                 date: notification.date,
 
                 company: {

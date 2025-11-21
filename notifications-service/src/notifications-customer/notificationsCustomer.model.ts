@@ -15,6 +15,9 @@ export interface NotificationCustomerCreationAttributes {
     type: NotificationCustomerType
     text: string;
     profession: string;
+    schedulingDate: string;
+    schedulingStartTime: string;
+    schedulingEndTime: string;
     date: Date
 }
 
@@ -59,6 +62,24 @@ export class NotificationsCustomer extends Model<NotificationsCustomer, Notifica
         allowNull: false 
     })
     declare profession: string;
+
+    @Column({ 
+        type: DataType.STRING,
+        allowNull: true 
+    })
+    declare schedulingDate: string;
+
+    @Column({ 
+        type: DataType.STRING,
+        allowNull: true 
+    })
+    declare schedulingStartTime: string;
+
+    @Column({ 
+        type: DataType.STRING,
+        allowNull: true 
+    })
+    declare schedulingEndTime: string;
 
     @Column({ 
         type: DataType.DATE,

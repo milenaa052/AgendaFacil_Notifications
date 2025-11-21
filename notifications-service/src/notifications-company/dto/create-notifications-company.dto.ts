@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsEnum, IsDateString } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsDateString, IsOptional } from 'class-validator';
 import { NotificationCompanyType } from '../notificationsCompany.model';
 
 export class CreateNotificationsCompanyDto {
@@ -8,5 +8,8 @@ export class CreateNotificationsCompanyDto {
     @IsString() text: string;
     @IsString() street: string;
     @IsNumber() number: number;
+    @IsOptional() @IsString() schedulingDate: string;
+    @IsOptional() @IsString() schedulingStartTime: string;
+    @IsOptional() @IsString() schedulingEndTime: string;
     @IsDateString() date: Date;
 }
