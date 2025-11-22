@@ -9,6 +9,10 @@ import { HttpService } from 'src/http/http.service';
 export interface CompanyResponse {
     idCompany: number;
     name: string;
+    profession: string;
+    street: string;
+    number: number;
+    phone: string;
 }
 
 export interface CustomerResponse {
@@ -170,7 +174,11 @@ export class NotificationsCompanyService {
 
                 company: {
                     idCompany: company.idCompany,
-                    name: company.name
+                    name: company.name,
+                    profession: company.profession,
+                    street: company.street,
+                    number: company.number,
+                    phone: company.phone
                 },
 
                 customer: customer
@@ -213,7 +221,7 @@ export class NotificationsCompanyService {
             throw new BadRequestException('Type deve ser PENDENTE, CONFIRMADO, CANCELADO, FINALIZADO, LEMBRETE, CONCLUIDO ou AVALIACAO!');
         }
 
-        const allowedFields = ['type', 'text', 'street', 'number', 'date'];
+        const allowedFields = ['type', 'text', 'street', 'number', 'schedulingDate', 'schedulingStartTime', 'schedulingEndTime', 'date'];
         for (const key of allowedFields) {
             if (dto[key] !== undefined) {
                 notification[key] = dto[key];
