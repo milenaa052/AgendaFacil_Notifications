@@ -8,6 +8,7 @@ export class CreateNotificationsCompanyDto {
     @IsString() text: string;
     @IsString() street: string;
     @IsNumber() number: number;
+    @IsOptional() @IsNumber() schedulingCompanyId: number;
     @IsOptional() @IsString() schedulingDate: string;
     @IsOptional() @IsString() schedulingStartTime: string;
     @IsOptional() @IsString() schedulingEndTime: string;

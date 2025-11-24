@@ -12,6 +12,7 @@ services:
       DB_NAME: notificationsdb
       DB_PORT: 5432
       USERS_API: http://service-users:3000
+      SCHEDULING_API: http://service-scheduling:3000
       REDIS_HOST: redis-notifications
       REDIS_PORT: 6379
     env_file:

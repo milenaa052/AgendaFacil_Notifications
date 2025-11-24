@@ -37,7 +37,7 @@ export class NotificationsCustomerService {
 
         let customer;
         try {
-            const response = await this.http.instance.get(`customer/${createNotificationCustomerDto.customerId}`, {
+            const response = await this.http.users.get(`customer/${createNotificationCustomerDto.customerId}`, {
                 headers: { Authorization: token }
             });
             customer = response.data;
@@ -54,7 +54,7 @@ export class NotificationsCustomerService {
 
         let company;
         try {
-            const response = await this.http.instance.get(`company/${createNotificationCustomerDto.companyId}`, {
+            const response = await this.http.users.get(`company/${createNotificationCustomerDto.companyId}`, {
                 headers: { Authorization: token }
             });
             company = response.data;
@@ -110,7 +110,7 @@ export class NotificationsCustomerService {
     async findByCustomerId(customerId: number, token: string) {
         let customer: CustomerResponse;
         try {
-            const response = await this.http.instance.get<CustomerResponse>(`customer/${customerId}`, {
+            const response = await this.http.users.get<CustomerResponse>(`customer/${customerId}`, {
                 headers: { Authorization: token }
             });
 
@@ -138,7 +138,7 @@ export class NotificationsCustomerService {
         try {
             companies = await Promise.all(
                 companyIds.map(async (id) => {
-                    const res = await this.http.instance.get<CompanyResponse>(`company/${id}`, {
+                    const res = await this.http.users.get<CompanyResponse>(`company/${id}`, {
                         headers: { Authorization: token }
                     });
                     return res.data;

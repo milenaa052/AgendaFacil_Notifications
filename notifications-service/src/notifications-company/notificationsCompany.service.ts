@@ -23,6 +23,20 @@ export interface CustomerResponse {
     phone: string;
 }
 
+export interface SchedulingCompanyResponse {
+    idSchedulingCompany: number;
+    companyId: number;
+    customerId: number;
+    schedulingCustomerId: number;
+    title: string;
+    startDate: string;
+    endDate: string;
+    startHour: string;
+    endHour: string;
+    status: string;
+    notificationSent: boolean;
+}
+
 @Injectable()
 export class NotificationsCompanyService {
     constructor(
@@ -40,7 +54,7 @@ export class NotificationsCompanyService {
 
         let customer;
         try {
-            const response = await this.http.instance.get(`customer/${createNotificationCompanyDto.customerId}`, {
+            const response = await this.http.users.get(`customer/${createNotificationCompanyDto.customerId}`, {
                 headers: { Authorization: token }
             });
             customer = response.data;
@@ -57,7 +71,7 @@ export class NotificationsCompanyService {
 
         let company;
         try {
-            const response = await this.http.instance.get(`company/${createNotificationCompanyDto.companyId}`, {
+            const response = await this.http.users.get(`company/${createNotificationCompanyDto.companyId}`, {
                 headers: { Authorization: token }
             });
             company = response.data;
@@ -70,6 +84,25 @@ export class NotificationsCompanyService {
             throw new BadRequestException(
                 error.response?.data?.message || 'Erro ao validar empresa'
             );
+        }
+
+        let scheduling = null;
+        if (createNotificationCompanyDto.schedulingCompanyId) {
+            try {
+                const response = await this.http.scheduling.get(`scheduling-company/${createNotificationCompanyDto.schedulingCompanyId}`, {
+                    headers: { Authorization: token }
+                });
+                scheduling = response.data;
+
+            } catch (error) {
+                if (error.response?.status === 404) {
+                    throw new NotFoundException('Agendamento não encontrado!');
+                }
+
+                throw new BadRequestException(
+                    error.response?.data?.message || 'Erro ao validar agendamento'
+                );
+            }
         }
 
         const validType = [
@@ -92,6 +125,7 @@ export class NotificationsCompanyService {
             text: createNotificationCompanyDto.text,
             street: createNotificationCompanyDto.street,
             number: createNotificationCompanyDto.number,
+            schedulingCompanyId: createNotificationCompanyDto.schedulingCompanyId,
             schedulingDate: createNotificationCompanyDto.schedulingDate,
             schedulingStartTime: createNotificationCompanyDto.schedulingStartTime,
             schedulingEndTime: createNotificationCompanyDto.schedulingEndTime,
@@ -115,7 +149,7 @@ export class NotificationsCompanyService {
     async findByCompanyId(companyId: number, token: string) {
         let company: CompanyResponse;
         try {
-            const response = await this.http.instance.get<CompanyResponse>(`company/${companyId}`, {
+            const response = await this.http.users.get<CompanyResponse>(`company/${companyId}`, {
                 headers: { Authorization: token }
             });
 
@@ -143,7 +177,7 @@ export class NotificationsCompanyService {
         try {
             customers = await Promise.all(
                 customerIds.map(async (id) => {
-                    const res = await this.http.instance.get<CustomerResponse>(`customer/${id}`, {
+                    const res = await this.http.users.get<CustomerResponse>(`customer/${id}`, {
                         headers: { Authorization: token }
                     });
                     return res.data;
@@ -160,13 +194,43 @@ export class NotificationsCompanyService {
         const customerMap = new Map<number, CustomerResponse>();
         customers.forEach(c => customerMap.set(c.idCustomer, c));
 
+        const validSchedulingIds: number[] = [...new Set(
+            notifications.map(n => n.schedulingCompanyId)
+        )].filter((id): id is number => id !== null && id !== undefined);
+
+        let schedulings: SchedulingCompanyResponse[] = [];
+
+        if (validSchedulingIds.length > 0) {
+            try {
+                const results = await Promise.allSettled(
+                    validSchedulingIds.map(async (id) => {
+                        const res = await this.http.scheduling.get<SchedulingCompanyResponse>(`scheduling-company/${id}`, {
+                            headers: { Authorization: token }
+                        });
+                        return res.data;
+                    })
+                );
+
+                schedulings = results
+                    .filter(result => result.status === 'fulfilled')
+                    .map(result => (result as PromiseFulfilledResult<SchedulingCompanyResponse>).value);
+            } catch (error) {
+                throw new BadRequestException(error.response?.data?.message || 'Erro ao validar agendamentos da empresa');
+            }
+        }
+
+        const schedulingMap = new Map<number, SchedulingCompanyResponse>();
+        schedulings.forEach(s => schedulingMap.set(s.idSchedulingCompany, s));
+
         return notifications.map(notification => {
             const customer = customerMap.get(notification.customerId);
+            const scheduling = schedulingMap.get(notification.schedulingCompanyId);
 
             return {
                 idNotificationCompany: notification.idNotificationCompany,
                 type: notification.type,
                 text: notification.text,
+                schedulingCompanyId: notification.schedulingCompanyId,
                 schedulingDate: notification.schedulingDate,
                 schedulingStartTime: notification.schedulingStartTime,
                 schedulingEndTime: notification.schedulingEndTime,
@@ -189,6 +253,22 @@ export class NotificationsCompanyService {
                         number: customer.number,
                         phone: customer.phone
                     }
+                    : null,
+
+                scheduling: scheduling
+                    ? {
+                        idSchedulingCompany: scheduling.idSchedulingCompany,
+                        companyId: scheduling.companyId,
+                        customerId: scheduling.customerId,
+                        schedulingCustomerId: scheduling.schedulingCustomerId,
+                        title: scheduling.title,
+                        startDate: scheduling.startDate,
+                        endDate: scheduling.endDate,
+                        startHour: scheduling.startHour,
+                        endHour: scheduling.endHour,
+                        status: scheduling.status,
+                        notificationSent: scheduling.notificationSent
+                    }
                     : null
             };
         });
@@ -208,6 +288,14 @@ export class NotificationsCompanyService {
             throw new BadRequestException('Empresa não pode ser alterado!');
         }
 
+        if (notification.schedulingCompanyId) {
+            if (dto.schedulingCompanyId) {
+                if (dto.schedulingCompanyId !== notification.schedulingCompanyId) {
+                    throw new BadRequestException('Agendamento da empresa não pode ser alterado!');
+                }
+            }
+        }
+
         const validType = [
             NotificationCompanyType.PENDENTE,
             NotificationCompanyType.CONFIRMADO,
@@ -221,7 +309,7 @@ export class NotificationsCompanyService {
             throw new BadRequestException('Type deve ser PENDENTE, CONFIRMADO, CANCELADO, FINALIZADO, LEMBRETE, CONCLUIDO ou AVALIACAO!');
         }
 
-        const allowedFields = ['type', 'text', 'street', 'number', 'schedulingDate', 'schedulingStartTime', 'schedulingEndTime', 'date'];
+        const allowedFields = ['type', 'text', 'street', 'number', 'schedulingCompanyId', 'schedulingDate', 'schedulingStartTime', 'schedulingEndTime', 'date'];
         for (const key of allowedFields) {
             if (dto[key] !== undefined) {
                 notification[key] = dto[key];
