@@ -5,6 +5,7 @@ import { NotificationsCompanyModule } from './notifications-company/notification
 import { NotificationsCustomerModule } from './notifications-customer/notificationsCustomer.module';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { JwtModule } from '@nestjs/jwt';
     }),
 
     NotificationsCompanyModule,
-    NotificationsCustomerModule
+    NotificationsCustomerModule,
+    RedisModule
   ],
   providers: [JwtStrategy]
 })

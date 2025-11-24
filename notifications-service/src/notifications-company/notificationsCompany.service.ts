@@ -5,6 +5,7 @@ import { CreateNotificationsCompanyDto } from './dto/create-notifications-compan
 import { UpdateNotificationCompanyDto } from './dto/update-notifications-company.dto';
 import { NotificationCompanyType } from './notificationsCompany.model';
 import { HttpService } from 'src/http/http.service';
+import { RedisService } from 'src/redis/redis.service';
 
 export interface CompanyResponse {
     idCompany: number;
@@ -41,7 +42,8 @@ export interface SchedulingCompanyResponse {
 export class NotificationsCompanyService {
     constructor(
         @InjectModel(NotificationsCompany) private notificationCompanyModel: typeof NotificationsCompany,
-        private http: HttpService
+        private http: HttpService,
+        private redis: RedisService
     ) {}
 
     async create(createNotificationCompanyDto: CreateNotificationsCompanyDto, token: string): Promise<NotificationsCompany> {
@@ -132,7 +134,13 @@ export class NotificationsCompanyService {
             date: createNotificationCompanyDto.date
         };
 
-        return await this.notificationCompanyModel.create(NotificationCompanyData);
+        const notificationCompany = await this.notificationCompanyModel.create(NotificationCompanyData);
+
+        const cacheKey = `company:${createNotificationCompanyDto.companyId}`;
+        await this.redis.getClient().del(cacheKey);
+        console.log(`🗑️ Cache invalidado: ${cacheKey}`);
+
+        return notificationCompany;
     }
 
     async findAll() {
@@ -147,6 +155,27 @@ export class NotificationsCompanyService {
     }
 
     async findByCompanyId(companyId: number, token: string) {
+        if (!companyId) {
+            throw new BadRequestException("O ID da empresa é obrigatório!");
+        }
+
+        const cacheKey = `company:${companyId}`;
+
+        try {
+            const cache = await this.redis.getClient();
+
+            const pong = await cache.ping();
+            console.log("Redis ping response:", pong);
+
+            const cachedData = await cache.get(cacheKey);
+            if (cachedData) {
+                console.log(`♻️ Retornando notificações da empresa do cache (${cacheKey})`);
+                return JSON.parse(cachedData);
+            }
+        } catch (error) {
+            console.log("❌ Erro ao acessar o cache:", error);
+        }
+
         let company: CompanyResponse;
         try {
             const response = await this.http.users.get<CompanyResponse>(`company/${companyId}`, {
@@ -222,7 +251,7 @@ export class NotificationsCompanyService {
         const schedulingMap = new Map<number, SchedulingCompanyResponse>();
         schedulings.forEach(s => schedulingMap.set(s.idSchedulingCompany, s));
 
-        return notifications.map(notification => {
+        const result = notifications.map(notification => {
             const customer = customerMap.get(notification.customerId);
             const scheduling = schedulingMap.get(notification.schedulingCompanyId);
 
@@ -272,6 +301,25 @@ export class NotificationsCompanyService {
                     : null
             };
         });
+
+        try {
+            await this.redis.getClient().set(cacheKey, JSON.stringify(result), 'EX', 300);
+            console.log(`💾 Dados das notificações da empresa salvos no cache (${cacheKey}) com TTL de 300s`);
+        } catch(error) {
+            console.log("❌ Erro ao salvar no cache:", error);
+        }
+
+        return result;
+    }
+
+    async invalidateNotificationsCompanyCacheById(companyId: number) {
+        const pattern = `company:${companyId}*`;
+        const keys = await this.redis.getClient().keys(pattern);
+
+        for (const key of keys) {
+            await this.redis.getClient().del(key);
+            console.log(`🗑️ Cache da empresa invalidado: ${key}`);
+        }
     }
 
     async update(id: number, dto: UpdateNotificationCompanyDto) {
@@ -317,6 +365,11 @@ export class NotificationsCompanyService {
         }
 
         await notification.save();
+
+        const cacheKey = `company:${notification.companyId}`;
+        await this.redis.getClient().del(cacheKey);
+        console.log(`🗑️ Cache invalidado: ${cacheKey}`);
+
         return notification;
     }
 }
