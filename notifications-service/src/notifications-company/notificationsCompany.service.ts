@@ -34,6 +34,7 @@ export interface SchedulingCompanyResponse {
     endDate: string;
     startHour: string;
     endHour: string;
+    budget: number;
     status: string;
     notificationSent: boolean;
 }
@@ -311,6 +312,7 @@ export class NotificationsCompanyService {
                         endDate: scheduling.endDate,
                         startHour: scheduling.startHour,
                         endHour: scheduling.endHour,
+                        budget: scheduling.budget,
                         status: scheduling.status,
                         notificationSent: scheduling.notificationSent
                     }
