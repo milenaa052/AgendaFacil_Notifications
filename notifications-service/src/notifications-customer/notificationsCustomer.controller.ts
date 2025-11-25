@@ -40,6 +40,6 @@ export class NotificationsCustomerController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateNotificationsCustomerDto: UpdateNotificationCustomerDto
     ) {
-        return await this.notificationsCustomerService.update(id, updateNotificationsCustomerDto);
+        return await this.notificationsCustomerService.updateNotificationCustomer(id, updateNotificationsCustomerDto);
     }
 }

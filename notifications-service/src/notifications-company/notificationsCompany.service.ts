@@ -136,11 +136,27 @@ export class NotificationsCompanyService {
 
         const notificationCompany = await this.notificationCompanyModel.create(NotificationCompanyData);
 
+        await this.redis.getPublisher().publish('notification_company_status_changed', JSON.stringify({
+            idNotificationCompany: notificationCompany.idNotificationCompany,
+            companyId: notificationCompany.companyId,
+            newType: notificationCompany.type
+        }));
+        console.log(`[PUBLISHED] notification_company_status_changed event to Redis for type: ${notificationCompany.type}`);
+
         const cacheKey = `company:${createNotificationCompanyDto.companyId}`;
         await this.redis.getClient().del(cacheKey);
         console.log(`🗑️ Cache invalidado: ${cacheKey}`);
 
         return notificationCompany;
+    }
+
+    async get(id: number) {
+        return await this.notificationCompanyModel.findByPk(id);
+    }
+    
+    async update(notification: NotificationsCompany): Promise<NotificationsCompany> {
+        await notification.save();
+        return notification;
     }
 
     async findAll() {
@@ -322,7 +338,7 @@ export class NotificationsCompanyService {
         }
     }
 
-    async update(id: number, dto: UpdateNotificationCompanyDto) {
+    async updateNotificationCompany(id: number, dto: UpdateNotificationCompanyDto) {
         const notification = await this.notificationCompanyModel.findByPk(id);
         if (!notification) {
             throw new NotFoundException('Notificação não encontrada!');
@@ -365,6 +381,13 @@ export class NotificationsCompanyService {
         }
 
         await notification.save();
+
+        await this.redis.getPublisher().publish('notification_company_status_changed', JSON.stringify({
+            idNotificationCompany: notification.idNotificationCompany,
+            companyId: notification.companyId,
+            newType: notification.type
+        }));
+        console.log(`[PUBLISHED] notification_company_status_changed event to Redis for type: ${notification.type}`);
 
         const cacheKey = `company:${notification.companyId}`;
         await this.redis.getClient().del(cacheKey);

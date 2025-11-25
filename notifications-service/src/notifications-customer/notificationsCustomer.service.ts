@@ -97,11 +97,27 @@ export class NotificationsCustomerService {
 
         const notificationCustomer = await this.notificationCustomerModel.create(NotificationCustomerData);
 
+        await this.redis.getPublisher().publish('notification_customer_status_changed', JSON.stringify({
+            idNotificationCustomer: notificationCustomer.idNotificationCustomer,
+            customerId: notificationCustomer.customerId,
+            newType: notificationCustomer.type
+        }));
+        console.log(`[PUBLISHED] notification_customer_status_changed event to Redis for type: ${notificationCustomer.type}`);
+
         const cacheKey = `customer:${createNotificationCustomerDto.customerId}`;
         await this.redis.getClient().del(cacheKey);
         console.log(`🗑️ Cache invalidado: ${cacheKey}`);
 
         return notificationCustomer;
+    }
+
+    async get(id: number) {
+        return await this.notificationCustomerModel.findByPk(id);
+    }
+
+    async update(notification: NotificationsCustomer): Promise<NotificationsCustomer> {
+        await notification.save();
+        return notification;
     }
 
     async findAll() {
@@ -232,7 +248,7 @@ export class NotificationsCustomerService {
         }
     }
 
-    async update(id: number, dto: UpdateNotificationCustomerDto) {
+    async updateNotificationCustomer(id: number, dto: UpdateNotificationCustomerDto) {
         const notification = await this.notificationCustomerModel.findByPk(id);
         if (!notification) {
             throw new NotFoundException('Notificação não encontrada!');
@@ -266,6 +282,13 @@ export class NotificationsCustomerService {
         }
 
         await notification.save();
+
+        await this.redis.getPublisher().publish('notification_customer_status_changed', JSON.stringify({
+            idNotificationCustomer: notification.idNotificationCustomer,
+            customerId: notification.customerId,
+            newType: notification.type
+        }));
+        console.log(`[PUBLISHED] notification_customer_status_changed event to Redis for type: ${notification.type}`);
 
         const cacheKey = `customer:${notification.customerId}`;
         await this.redis.getClient().del(cacheKey);
