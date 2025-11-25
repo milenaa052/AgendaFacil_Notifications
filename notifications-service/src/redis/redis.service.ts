@@ -7,6 +7,7 @@ export class RedisService implements OnModuleDestroy {
     private client: Redis;
     private pub: Redis;
     private sub: Redis;
+    private sub2: Redis;
 
     constructor(cfg: ConfigService) {
         const host = cfg.get('REDIS_HOST', 'localhost');
@@ -15,6 +16,7 @@ export class RedisService implements OnModuleDestroy {
         this.client = new IORedis({ host, port });
         this.pub = new IORedis({ host, port });
         this.sub = new IORedis({ host, port });
+        this.sub2 = new IORedis({ host, port });
     }
 
     async onModuleDestroy() {
@@ -32,5 +34,9 @@ export class RedisService implements OnModuleDestroy {
 
     getSubscriber() {
         return this.sub;
+    }
+
+    getSubscriber2() {
+        return this.sub2;
     }
 }
