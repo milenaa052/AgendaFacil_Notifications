@@ -10,27 +10,27 @@ export class NotificationStatusProcessorService implements OnModuleInit {
 
     async onModuleInit() {
         const sub = this.redisService.getSubscriber(); 
-        await sub.subscribe('notification_customer_status_changed', (err, count) => {
+        await sub.subscribe('notification_company_status_changed', (err, count) => {
             if (err) {
-                console.error('Failed to subscribe to notification_customer_status_changed: ', err);
+                console.error('Failed to subscribe to notification_company_status_changed: ', err);
             } else {
-                console.log(`[SUBSCRIBED] successfully! This customer is currently subscribed to ${count} channels.`);
+                console.log(`[SUBSCRIBED] successfully! This company is currently subscribed to ${count} channels.`);
             }
         });
 
         sub.on('message', async (channel, message) => {
-            if (channel === 'notification_customer_status_changed') {
+            if (channel === 'notification_company_status_changed') {
                 console.log(`Received message from channel ${channel}: ${message}`);
 
                 let notificationEvent: any = JSON.parse(message);
                 console.log(`[PROCESSING] notification status: ${notificationEvent.newType}`);
                 
-                await this.redisService.getPublisher().publish('notification_customer_ready_to_send', JSON.stringify({
-                    idNotificationCustomer: notificationEvent.idNotificationCustomer,
-                    customerId: notificationEvent.customerId,
+                await this.redisService.getPublisher().publish('notification_company_ready_to_send', JSON.stringify({
+                    idNotificationCompany: notificationEvent.idNotificationCompany,
+                    companyId: notificationEvent.companyId,
                     type: notificationEvent.newType
                 }));
-                console.log(`[PUBLISHED] notification_customer_ready_to_send event for type: ${notificationEvent.newType}`);
+                console.log(`[PUBLISHED] notification_company_ready_to_send event for type: ${notificationEvent.newType}`);
             }
         });
     }

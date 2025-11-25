@@ -17,7 +17,7 @@ export class NotificationSenderService implements OnModuleInit {
             if (err) {
                 console.error('Failed to subscribe to notification_customer_ready_to_send: ', err);
             } else {
-                console.log(`[SUBSCRIBED] successfully! This client is currently subscribed to ${count} channels.`);
+                console.log(`[SUBSCRIBED] successfully! This customer is currently subscribed to ${count} channels.`);
             }
         });
 
