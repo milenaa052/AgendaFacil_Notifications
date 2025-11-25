@@ -97,12 +97,12 @@ export class NotificationsCustomerService {
 
         const notificationCustomer = await this.notificationCustomerModel.create(NotificationCustomerData);
 
-        await this.redis.getPublisher().publish('notification_status_changed', JSON.stringify({
+        await this.redis.getPublisher().publish('notification_customer_status_changed', JSON.stringify({
             idNotificationCustomer: notificationCustomer.idNotificationCustomer,
             customerId: notificationCustomer.customerId,
             newType: notificationCustomer.type
         }));
-        console.log(`[PUBLISHED] notification_status_changed event to Redis for type: ${notificationCustomer.type}`);
+        console.log(`[PUBLISHED] notification_customer_status_changed event to Redis for type: ${notificationCustomer.type}`);
 
         const cacheKey = `customer:${createNotificationCustomerDto.customerId}`;
         await this.redis.getClient().del(cacheKey);
@@ -283,12 +283,12 @@ export class NotificationsCustomerService {
 
         await notification.save();
 
-        await this.redis.getPublisher().publish('notification_status_changed', JSON.stringify({
+        await this.redis.getPublisher().publish('notification_customer_status_changed', JSON.stringify({
             idNotificationCustomer: notification.idNotificationCustomer,
             customerId: notification.customerId,
             newType: notification.type
         }));
-        console.log(`[PUBLISHED] notification_status_changed event to Redis for type: ${notification.type}`);
+        console.log(`[PUBLISHED] notification_customer_status_changed event to Redis for type: ${notification.type}`);
 
         const cacheKey = `customer:${notification.customerId}`;
         await this.redis.getClient().del(cacheKey);

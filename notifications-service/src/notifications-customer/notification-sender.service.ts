@@ -13,16 +13,16 @@ export class NotificationSenderService implements OnModuleInit {
 
     async onModuleInit() {
         const sub = this.redisService.getSubscriber2(); 
-        await sub.subscribe('notification_ready_to_send', (err, count) => {
+        await sub.subscribe('notification_customer_ready_to_send', (err, count) => {
             if (err) {
-                console.error('Failed to subscribe to notification_ready_to_send: ', err);
+                console.error('Failed to subscribe to notification_customer_ready_to_send: ', err);
             } else {
                 console.log(`[SUBSCRIBED] successfully! This client is currently subscribed to ${count} channels.`);
             }
         });
 
         sub.on('message', async (channel, message) => {
-            if (channel === 'notification_ready_to_send') {
+            if (channel === 'notification_customer_ready_to_send') {
                 let notificationEvent: any = JSON.parse(message);
                 
                 let existing = await this.notificationsCustomerService.get(notificationEvent.idNotificationCustomer);
