@@ -375,7 +375,13 @@ export class NotificationsCompanyService {
             throw new BadRequestException('Type deve ser PENDENTE, CONFIRMADO, CANCELADO, FINALIZADO, LEMBRETE, CONCLUIDO ou AVALIACAO!');
         }
 
-        Object.assign(notification, dto);
+        const allowedFields = ['type', 'text', 'street', 'number', 'schedulingCompanyId', 'schedulingDate', 'schedulingStartTime', 'schedulingEndTime', 'date'];
+        for (const key of allowedFields) {
+            if (dto[key] !== undefined) {
+                notification[key] = dto[key];
+            }
+        }
+        
         await notification.save();
 
         await this.redis.getPublisher().publish('notification_company_status_changed', JSON.stringify({
