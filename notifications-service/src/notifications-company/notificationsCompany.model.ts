@@ -17,10 +17,10 @@ export interface NotificationCompanyCreationAttributes {
     text: string;
     street: string;
     number: number;
-    schedulingCompanyId: number;
-    schedulingDate: string;
-    schedulingStartTime: string;
-    schedulingEndTime: string;
+    schedulingCompanyId?: number;
+    schedulingDate?: string;
+    schedulingStartTime?: string;
+    schedulingEndTime?: string;
     date: Date
 }
 
