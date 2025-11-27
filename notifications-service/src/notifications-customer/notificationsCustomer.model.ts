@@ -15,9 +15,9 @@ export interface NotificationCustomerCreationAttributes {
     type: NotificationCustomerType
     text: string;
     profession: string;
-    schedulingDate: string;
-    schedulingStartTime: string;
-    schedulingEndTime: string;
+    schedulingDate?: string;
+    schedulingStartTime?: string;
+    schedulingEndTime?: string;
     date: Date
 }
 
